@@ -38,6 +38,7 @@ def register(request):
                 user=LoginUser()
                 user.email=email
                 user.password=setPassword(password)
+                user.user_type=0
                 user.save()
             else:
                 # 存在
@@ -81,9 +82,7 @@ def logout(request):
     del request.session['email']
     return response
 
-def base(request):
-    return render(request,'saller/base.html')
-
+@loginVaild
 def goods_list(request,status,page):
     if status == '0':
         goods = Goods.objects.filter(goods_status=0).order_by('goods_number')
@@ -129,10 +128,37 @@ def personal_info(request):
     if request.method=="POST":
         data = request.POST
         user.phone_number=data.get('phone_number')
-        user.age=data.get('age')
+        if data.get('age'):
+            user.age=data.get('age')
+        else:
+            user.age=0
         user.gender=data.get('gender')
         user.address=data.get('address')
         if request.FILES.get('photo'):
             user.photo=request.FILES.get('photo')
         user.save()
     return render(request,'saller/personal.html',locals())
+
+@loginVaild
+def goods_add(request):
+    goods_type=GoodsType.objects.all()
+    if request.method=='POST':
+        data=request.POST
+        goods=Goods()
+        goods.goods_number = data.get('goods_number')
+        goods.goods_name = data.get('goods_name')
+        goods.goods_price = data.get('goods_price')
+        goods.goods_count = data.get('goods_count')
+        goods.goods_location = data.get('goods_location')
+        goods.goods_safe_date = data.get('goods_safe_date')
+        goods.goods_status = 1
+        goods.picture = request.FILES.get('picture')
+        goods.save()
+        # select标签的value类型是string
+        type=request.POST.get('goods_type')
+        # 自动强转
+        goods.goods_type=GoodsType.objects.get(id=type)
+        user_id = request.COOKIES.get("userid")
+        goods.goods_store = LoginUser.objects.get(id=user_id)
+        goods.save()
+    return render(request,'saller/goods_add.html',locals())

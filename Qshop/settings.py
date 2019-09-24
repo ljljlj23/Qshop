@@ -14,7 +14,6 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -124,6 +123,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR,'static'),
 )
+# 这条配置跟STATICFILES_DIRS，MEDIA_URL，MEDIA_ROOT冲突
+# 在做静态文件收集的时候，如果收集完成之后，需要注释掉
+# STATIC_ROOT = os.path.join(BASE_DIR,'static')
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'static')
