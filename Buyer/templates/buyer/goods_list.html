@@ -31,7 +31,8 @@
 		<span>></span>
 		<a href="#">新鲜水果</a>
 	</div>
-	<div class="main_wrap clearfix">
+  {% if goods %}
+	  <div class="main_wrap clearfix">
 		<div class="l_wrap fl clearfix">
 			<div class="new_goods">
 				<h3>新品推荐</h3>
@@ -78,4 +79,11 @@
 			</div>
 		</div>
 	</div>
+  {% else %}
+    <p style="text-align: center;font-size: 30px;color: forestgreen">
+      暂时没有该商品，敬请期待。。。<br><br>
+      您可以查看一下其他商品<br><br>
+      <a href="/Buyer/goods_list/?keywords=1&req_type=findall">新鲜水果</a>
+    </p>
+  {% endif %}
 {% endblock %}

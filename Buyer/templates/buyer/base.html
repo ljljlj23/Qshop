@@ -18,7 +18,7 @@
 			<div class="welcome fl">欢迎来到天天生鲜!</div>
 			<div class="fr">
 				<div class="login_btn fl">
-          {% if request.COOKIES.email %}
+          {% if request.COOKIES.email and request.COOKIES.user_type == '1' %}
             <span>欢迎{{ request.COOKIES.email }}</span>
             <a href="/Buyer/logout/">登出</a>
             <span>|</span>
@@ -30,7 +30,7 @@
 				</div>
 				<div class="user_link fl">
 					<span>|</span>
-					<a href="#">用户中心</a>
+					<a href="/Buyer/user_center_info/">用户中心</a>
 					<span>|</span>
 					<a href="#">我的购物车</a>
 					<span>|</span>
@@ -41,10 +41,10 @@
 	</div>
 
 	<div class="search_bar clearfix">
-		<a href="index.html" class="logo fl"><img src="/static/buyer/images/logo.png"></a>
+		<a href="/Buyer/index/" class="logo fl"><img src="/static/buyer/images/logo.png"></a>
 		<div class="search_con fl">
-			<input type="text" class="input_text fl" name="" placeholder="搜索商品">
-			<input type="button" class="input_btn fr" name="" value="搜索">
+			<input type="text" id="keywords" class="input_text fl" name="text" placeholder="搜索商品">
+      <input type="button" class="input_btn fr" name="" value="搜索" onclick="getgoods()">
 		</div>
 		<div class="guest_cart fr">
 			<a href="#" class="cart_name fl">我的购物车</a>
@@ -70,7 +70,15 @@
 	</div>
   {% block script %}
   {% endblock %}
-	<script type="text/javascript" src="/static/buyer/js/slideshow.js"></script>
+  <script>
+    function getgoods() {
+        keywords=$('#keywords').val();
+        if(keywords){
+            url='/Buyer/goods_list/?keywords='+keywords+'&req_type=search';
+            window.location.href=url;    //js中跳转页面
+        }
+    }
+  </script>
 	<script type="text/javascript">
 		BCSlideshow('focuspic');
 		var oFruit = document.getElementById('fruit_more');

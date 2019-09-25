@@ -19,8 +19,9 @@ def loginVaild(func):
     def inner(request,*args,**kwargs):
         email = request.COOKIES.get('email')
         password = request.COOKIES.get('password')
+        user_type = request.COOKIES.get('user_type')
         email_session = request.session.get('email')
-        if email and password and email==email_session:
+        if email and password and email==email_session and user_type=='0':
             return func(request,*args,**kwargs)
         else:
             return HttpResponseRedirect('/Saller/login/')
@@ -52,12 +53,13 @@ def login(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         if email:
-            user = LoginUser.objects.filter(email=email).first()
+            user = LoginUser.objects.filter(email=email,user_type=0).first()
             if user:
                 if user.password==setPassword(password):
                     response= HttpResponseRedirect('/Saller/index/')
                     response.set_cookie('email',email)
                     response.set_cookie('password',password)
+                    response.set_cookie('user_type',user.user_type)
                     response.set_cookie('userid',user.id)
                     request.session['email']=email
                     return response
@@ -71,7 +73,6 @@ def login(request):
 
 @loginVaild
 def index(request):
-
     return render(request,'saller/index.html')
 
 def logout(request):
