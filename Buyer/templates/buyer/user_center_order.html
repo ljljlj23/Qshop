@@ -8,13 +8,13 @@
 			<h3>用户中心</h3>
 			<ul>
 				<li><a href="/Buyer/user_center_info/">· 个人信息</a></li>
-				<li><a href="/Buyer/user_center_order/" class="active">· 全部订单</a></li>
+				<li><a href="/Buyer/user_center_order/1/" class="active">· 全部订单</a></li>
 				<li><a href="">· 收货地址</a></li>
 			</ul>
 		</div>
 		<div class="right_content clearfix">
 				<h3 class="common_title2">全部订单</h3>
-      {% for order in payorder %}
+      {% for order in page_obj %}
 				<ul class="order_list_th w978 clearfix">
 					<li class="col01">{{ order.order_date }}</li>
 					<li class="col02">{{ order.order_number }}</li>
@@ -45,13 +45,15 @@
 				</table>
         {% endfor %}
 				<div class="pagenation">
-					<a href="#"><上一页</a>
-					<a href="#" class="active">1</a>
-					<a href="#">2</a>
-					<a href="#">3</a>
-					<a href="#">4</a>
-					<a href="#">5</a>
-					<a href="#">下一页></a>
+          {% if page_obj.has_previous %}
+					  <a href="/Buyer/user_center_order/{{ page_obj.previous_page_number }}">上一页</a>
+          {% endif %}
+          {% for page in paginator.page_range %}
+					<a href="/Buyer/user_center_order/{{ page }}" class="active">{{ page }}</a>
+          {% endfor %}
+          {% if page_obj.has_next %}
+					  <a href="/Buyer/user_center_order/{{ page_obj.next_page_number }}">下一页></a>
+          {% endif %}
 				</div>
 		</div>
 	</div>

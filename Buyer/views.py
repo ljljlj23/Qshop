@@ -262,9 +262,10 @@ def place_order_more(request):
     return render(request,'buyer/place_order.html',locals())
 
 @loginValid
-def user_center_order(request):
+def user_center_order(request,page):
     user_id = request.COOKIES.get('userid')
     user = LoginUser.objects.get(id=user_id)
     payorder = user.payorder_set.order_by('-order_date','order_status')
-
+    paginator = Paginator(payorder, 2)
+    page_obj = paginator.page(int(page))
     return render(request,'buyer/user_center_order.html',locals())
