@@ -32,7 +32,7 @@
 					<span>|</span>
 					<a href="/Buyer/user_center_info/">用户中心</a>
 					<span>|</span>
-					<a href="#">我的购物车</a>
+					<a href="/Buyer/cart/">我的购物车</a>
 					<span>|</span>
 					<a href="#">我的订单</a>
 				</div>
@@ -47,7 +47,7 @@
       <input type="button" class="input_btn fr" name="" value="搜索" onclick="getgoods()">
 		</div>
 		<div class="guest_cart fr">
-			<a href="#" class="cart_name fl">我的购物车</a>
+			<a href="/Buyer/cart/" class="cart_name fl">我的购物车</a>
 			<div class="goods_count fl" id="show_count">1</div>
 		</div>
 	</div>
@@ -74,7 +74,7 @@
     function getgoods() {
         keywords=$('#keywords').val();
         if(keywords){
-            url='/Buyer/goods_list/?keywords='+keywords+'&req_type=search';
+            url='/Buyer/goods_list/1/?keywords='+keywords+'&req_type=search';
             window.location.href=url;    //js中跳转页面
         }
     }

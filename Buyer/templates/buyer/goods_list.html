@@ -9,12 +9,12 @@
 				<h1>全部商品分类</h1>
 				<span></span>
 				<ul class="subnav">
-					<li><a href="#" class="fruit">新鲜水果</a></li>
-					<li><a href="#" class="seafood">海鲜水产</a></li>
-					<li><a href="#" class="meet">猪牛羊肉</a></li>
-					<li><a href="#" class="egg">禽类蛋品</a></li>
-					<li><a href="#" class="vegetables">新鲜蔬菜</a></li>
-					<li><a href="#" class="ice">速冻食品</a></li>
+					<li><a href="/Buyer/goods_list/1/?keywords=1&req_type=findall" class="fruit">新鲜水果</a></li>
+					<li><a href="/Buyer/goods_list/1/?keywords=2&req_type=findall" class="seafood">海鲜水产</a></li>
+					<li><a href="/Buyer/goods_list/1/?keywords=3&req_type=findall" class="meet">猪牛羊肉</a></li>
+					<li><a href="/Buyer/goods_list/1/?keywords=4&req_type=findall" class="egg">禽类蛋品</a></li>
+					<li><a href="/Buyer/goods_list/1/?keywords=5&req_type=findall" class="vegetables">新鲜蔬菜</a></li>
+					<li><a href="/Buyer/goods_list/1/?keywords=6&req_type=findall" class="ice">速冻食品</a></li>
 				</ul>
 			</div>
 			<ul class="navlist fl">
@@ -39,8 +39,8 @@
 				<ul>
           {% for one in comment %}
 					<li>
-						<a href="#"><img src="/static/{{ one.picture }}"></a>
-						<h4><a href="#">{{ one.goods_name }}</a></h4>
+						<a href="/Buyer/goods_detail/?id={{ one.id }}/"><img src="/static/{{ one.picture }}"></a>
+						<h4><a href="/Buyer/goods_detail/?id={{ one.id }}/">{{ one.goods_name }}</a></h4>
 						<div class="prize">{{ one.goods_price }}</div>
 					</li>
           {% endfor %}
@@ -56,26 +56,28 @@
 			</div>
 
 			<ul class="goods_type_list clearfix">
-        {% for good in goods %}
+        {% for good in page_obj %}
 				<li>
-					<a href="#"><img src="/static/{{ good.picture }}"></a>
-					<h4><a href="#">{{ good.goods_name }}</a></h4>
+					<a href="/Buyer/goods_detail/?id={{ good.id }}/"><img src="/static/{{ good.picture }}"></a>
+					<h4><a href="/Buyer/goods_detail/?id={{ good.id }}/">{{ good.goods_name }}</a></h4>
 					<div class="operate">
 						<span class="prize">{{ good.goods_price }}</span>
-						<a href="#" class="add_goods" title="加入购物车"></a>
+						<a id="{{ good.id }}" class="add_goods" title="加入购物车" onclick="add_cart(this)"></a>
 					</div>
 				</li>
         {% endfor %}
 			</ul>
 
 			<div class="pagenation">
-				<a href="#">上一页</a>
-				<a href="#" class="active">1</a>
-				<a href="#">2</a>
-				<a href="#">3</a>
-				<a href="#">4</a>
-				<a href="#">5</a>
-				<a href="#">下一页></a>
+        {% if page_obj.has_previous %}
+				  <a href="/Buyer/goods_list/{{ page_obj.previous_page_number }}/?keywords={{ keywords }}&req_type=findall">上一页</a>
+        {% endif %}
+        {% for page in paginator.page_range %}
+				<a href="/Buyer/goods_list/{{ page }}/?keywords={{ keywords }}&req_type=findall">{{ page }}</a>
+        {% endfor %}
+        {% if page_obj.has_next %}
+				  <a href="/Buyer/goods_list/{{ page_obj.next_page_number }}/?keywords={{ keywords }}&req_type=findall">下一页</a>
+        {% endif %}
 			</div>
 		</div>
 	</div>
@@ -83,7 +85,33 @@
     <p style="text-align: center;font-size: 30px;color: forestgreen">
       暂时没有该商品，敬请期待。。。<br><br>
       您可以查看一下其他商品<br><br>
-      <a href="/Buyer/goods_list/?keywords=1&req_type=findall">新鲜水果</a>
+      <a href="/Buyer/goods_list/1/?keywords=1&req_type=findall">新鲜水果</a>
     </p>
   {% endif %}
+{% endblock %}
+
+{% block script %}
+  <script>
+    function add_cart(obj) {
+        var goods_id = obj.id;
+        url='/Buyer/add_cart/';
+        send_data={
+            'goods_id':goods_id ,
+            'csrfmiddlewaretoken':'{{ csrf_token }}'
+        };
+        $.ajax(
+            {
+                url:url,
+                type:'post',
+                data:send_data,
+                success:function (data) {
+                    alert(data['msg'])
+                },
+                error:function (error) {
+                    console.log(error)
+                }
+            }
+        )
+    }
+  </script>
 {% endblock %}

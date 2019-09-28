@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include,re_path
 from Buyer.views import *
 
 urlpatterns = [
@@ -7,10 +7,16 @@ urlpatterns = [
     path('index/',index),
     path('register/',register),
     path('logout/',logout),
-    path('goods_list/',goods_list),
+    re_path('goods_list/(?P<page>\d+)',goods_list),
     path('goods_detail/',goods_detail),
     path('user_center_info/',user_center_info),
     path('place_order/',place_order),
+    path('alipayview/',AlipayView),
+    path('payresult/',payresult),
+    path('add_cart/',add_cart),
+    path('cart/',cart),
+    path('place_order_more/',place_order_more),
+    path('user_center_order/',user_center_order),
 
     # path('Saller/',include('Saller.urls')),
 ]

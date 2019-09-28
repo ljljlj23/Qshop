@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="db" uuid="21eed25f-e6e1-4142-adbe-988044e679ff">
+    <data-source source="LOCAL" name="db" uuid="a7b660e3-b645-4a6b-9235-1058c56b2fba">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:E:\demo\Qshop\db.sqlite3</jdbc-url>
+      <jdbc-url>jdbc:sqlite:E:\第三阶段\demo\Qshop\db.sqlite3</jdbc-url>
       <driver-properties>
         <property name="enable_load_extension" value="true" />
       </driver-properties>
