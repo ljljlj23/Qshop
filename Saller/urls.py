@@ -12,4 +12,5 @@ urlpatterns = [
     re_path('setStatus/(?P<status>\w+)/(?P<id>\d+)/',setStatus),
     path('personal_info/',personal_info),
     path('goods_add/',goods_add),
+    path('get_code/',get_code),
 ]

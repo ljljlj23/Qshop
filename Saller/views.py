@@ -1,9 +1,12 @@
 import random
 from django.shortcuts import render
 from .models import *
-from django.http import HttpResponseRedirect,HttpResponse
+from django.http import HttpResponseRedirect,HttpResponse,JsonResponse
 import hashlib
 from django.core.paginator import Paginator
+import smtplib
+from email.mime.text import MIMEText
+import time
 
 def hello(request):
     return HttpResponse('hello world')
@@ -52,17 +55,27 @@ def login(request):
     if request.method=='POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        code = request.POST.get('vaild_code')
         if email:
             user = LoginUser.objects.filter(email=email,user_type=0).first()
             if user:
                 if user.password==setPassword(password):
-                    response= HttpResponseRedirect('/Saller/index/')
-                    response.set_cookie('email',email)
-                    response.set_cookie('password',password)
-                    response.set_cookie('user_type',user.user_type)
-                    response.set_cookie('userid',user.id)
-                    request.session['email']=email
-                    return response
+                    vaild_code = Vaild_Code.objects.filter(code_status=0,code_user=email,code_content=code).first()
+                    if vaild_code:
+                        if time.time() - vaild_code.code_time < 120:
+                            response = HttpResponseRedirect('/Saller/index/')
+                            response.set_cookie('email', email)
+                            response.set_cookie('password', password)
+                            response.set_cookie('user_type', user.user_type)
+                            response.set_cookie('userid', user.id)
+                            request.session['email'] = email
+                            vaild_code.code_status = 1
+                            vaild_code.save()
+                            return response
+                        else:
+                            error_msg = '验证码超时，请重新获取'
+                    else:
+                        error_msg = '验证码不正确'
                 else:
                     error_msg = '密码错误'
             else:
@@ -163,3 +176,57 @@ def goods_add(request):
         goods.goods_store = LoginUser.objects.get(id=user_id)
         goods.save()
     return render(request,'saller/goods_add.html',locals())
+
+# 发送邮件
+def send_email(params):
+    # 传一个字典类型的参数params
+    subject = '登录验证码'
+    content = params.get('content')
+    sender = 'ljljlj23@163.com'
+    receiver = params.get('receiver')
+    password = 'ljljlj23'
+    message = MIMEText(content, 'plain', 'utf-8')
+    message["Subject"] = subject
+    message["From"] = sender
+    message["To"] = receiver
+    try:
+        smtp = smtplib.SMTP_SSL('smtp.163.com', 465)
+        smtp.login(sender, password)
+        smtp.sendmail(sender, receiver.split(","), message.as_string())
+        smtp.close()
+        return True
+    except:
+        return False
+
+# 保存验证码
+def get_code(request):
+    result = {'code':10000,'msg':''}
+    email = request.GET.get('email')
+    if email:
+        flag = LoginUser.objects.filter(email=email,user_type=0).exists()
+        if flag:
+            # 四位
+            code = random.randint(1000,9999)
+            content = '您的验证码是%s，不要告诉别人'%(code)
+            params={'content':content,'receiver':email}
+            eflag = send_email(params)
+            if eflag:
+                # 保存验证码到数据库
+                vaild_code = Vaild_Code()
+                vaild_code.code_content = code
+                vaild_code.code_status = 0
+                vaild_code.code_user = email
+                vaild_code.code_time = time.time()
+                vaild_code.save()
+                result['msg'] = '验证码发送成功'
+            else:
+                result['code'] = 10003
+                result['msg'] = '未知错误，请联系客服'
+        else:
+            result['code'] = 10002
+            result['msg'] = '用户不存在'
+    else:
+        result['code']=10001
+        result['msg'] = '邮箱不可为空'
+
+    return JsonResponse(result)

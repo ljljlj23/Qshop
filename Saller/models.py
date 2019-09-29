@@ -36,3 +36,10 @@ class Goods(models.Model):
     goods_type=models.ForeignKey(to=GoodsType,on_delete=models.CASCADE,default=1)
     # 店铺 一对多
     goods_store=models.ForeignKey(to=LoginUser,on_delete=models.CASCADE,default=1)
+
+class Vaild_Code(models.Model):
+    code_content = models.CharField(max_length=8,verbose_name='验证码')
+    code_time = models.FloatField(verbose_name='创建时间')
+    # 1使用 0未使用
+    code_status = models.IntegerField(verbose_name='状态')
+    code_user = models.EmailField(verbose_name='邮箱')
