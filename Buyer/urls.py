@@ -17,6 +17,7 @@ urlpatterns = [
     path('cart/',cart),
     path('place_order_more/',place_order_more),
     re_path('user_center_order/(?P<page>\d+)',user_center_order),
+    path('reqtest/',reqtest),
 
     # path('Saller/',include('Saller.urls')),
 ]

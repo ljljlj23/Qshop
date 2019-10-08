@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect,JsonResponse
+from django.http import HttpResponseRedirect,JsonResponse,HttpResponse
 import hashlib
 from django.core.paginator import Paginator
 from Saller.models import *
@@ -269,3 +269,12 @@ def user_center_order(request,page):
     paginator = Paginator(payorder, 2)
     page_obj = paginator.page(int(page))
     return render(request,'buyer/user_center_order.html',locals())
+
+from CeleryTask.tasks import *
+def reqtest(request):
+    # 执行celery任务
+    # test.delay()    # 发布任务
+    name = request.GET.get('name')
+    age = request.GET.get('age')
+    myprint.delay(name,age)
+    return HttpResponse('req test')
