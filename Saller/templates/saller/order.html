@@ -1,0 +1,58 @@
+{% extends 'saller/base.html' %}
+
+{% block title %}
+  订单列表
+{% endblock %}
+
+{% block label %}
+  订单列表
+{% endblock %}
+
+{% block content %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>订单编号</th>
+        <th>订单商品</th>
+        <th>商品数量</th>
+        <th>收货地址</th>
+        <th>收货人</th>
+        <th>订单总价</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for one in order_info %}
+      <tr>
+        <td>{{ one.order_id.order_number }}</td>
+        <td>{{ one.goods.goods_name }}</td>
+        <td>{{ one.goods_count }}</td>
+        <td>{{ one.order_id.order_user.useradress_set.first.user_address }}</td>
+        <td>{{ one.order_id.order_user.useradress_set.first.user_name }}</td>
+        <td>{{ one.goods_total_price }}</td>
+        <td>
+            {% if one.status == 0 %}
+                <a href="#" class="btn btn-primary">提醒支付</a>
+                <a href="/Saller/seller_operation/?type=jujue&order_info_id={{ one.id }}" class="btn btn-primary">拒绝订单</a>
+            {% elif one.status == 1%}
+                <a href="/Saller/seller_operation/?type=fahuo&order_info_id={{ one.id }}" class="btn btn-primary">立即发货</a>
+            {% elif one.status == 2%}
+                <a href="#" class="btn btn-primary">查看物流</a>
+            {% elif one.status == 3%}
+                <a href="#" class="btn btn-primary">查看订单详情</a>
+            {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    </tfoot>
+  </table>
+  <ul class="pagination" style="float: right;">
+  {% for page in paginator.page_range %}
+    <li class="paginate_button page-item previous">
+      <a href="/Saller/goods_list/{{ status }}/{{ page }}" class="page-link">{{ page }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

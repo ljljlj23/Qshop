@@ -6,7 +6,10 @@ import hashlib
 from django.core.paginator import Paginator
 import smtplib
 from email.mime.text import MIMEText
-import time
+from Buyer.models import *
+import datetime,time
+import calendar
+from django.db.models.aggregates import *
 
 def hello(request):
     return HttpResponse('hello world')
@@ -86,7 +89,53 @@ def login(request):
 
 @loginVaild
 def index(request):
-    return render(request,'saller/index.html')
+    user_id = request.COOKIES.get('userid')
+    # 当前月的第一天和当前月的最后一天
+    now = datetime.datetime.now()
+    year = now.year
+    month = now.month
+    last_day = calendar.monthrange(year, month)[1]
+    start = datetime.date(year,month,1)
+    end = datetime.date(year,month,last_day)
+    # 当前月份的订单
+    payorder = PayOrder.objects.filter(order_date__range=[start,end])
+    # 查询当月订单详情
+    order_info = OrderInfo.objects.filter(store_id_id=user_id,order_id__in=payorder).exclude(status__in=[0,4])
+
+    sum_all = order_info.aggregate(Sum('goods_total_price'),Count('id'),Sum('goods_count'))
+    print(sum_all)
+    sum_month = sum_all.get('goods_total_price__sum')
+    if sum_month == None:
+        sum_month = '0.0'
+
+    sum_count = sum_all.get('id__count')
+    if sum_count == None:
+        sum_count = 0
+
+    sum_goods_count = sum_all.get('goods_count__sum')
+    if sum_goods_count == None:
+        sum_goods_count = 0
+
+    # result = {}
+    # for one in order_info:
+    #     goods_info = one.goods
+    #     goods_id = goods_info.id
+    #     if goods_id in result.keys():
+    #         result[goods_id] += one.goods_count
+    #     else:
+    #         result[goods_id] = one.goods_count
+    # # 商品id
+    # result = max(result,key=lambda x:result[x])
+    # result = Goods.objects.get(id=result)
+    # result = result.goods_name
+
+    data = OrderInfo.objects.exclude(status__in=[0,4]).values('goods').annotate(
+        goods_num=Sum('goods_count')).order_by('-goods_num').first()
+    result = data.get('goods')
+    result = Goods.objects.get(id=result)
+    result = result.goods_name
+
+    return render(request,'saller/index.html',locals())
 
 def logout(request):
     response = HttpResponseRedirect('/Saller/login/')
@@ -207,21 +256,24 @@ def get_code(request):
         if flag:
             # 四位
             code = random.randint(1000,9999)
+            print(code)
             content = '您的验证码是%s，不要告诉别人'%(code)
             params={'content':content,'receiver':email}
-            eflag = send_email(params)
-            if eflag:
-                # 保存验证码到数据库
-                vaild_code = Vaild_Code()
-                vaild_code.code_content = code
-                vaild_code.code_status = 0
-                vaild_code.code_user = email
-                vaild_code.code_time = time.time()
-                vaild_code.save()
-                result['msg'] = '验证码发送成功'
-            else:
-                result['code'] = 10003
-                result['msg'] = '未知错误，请联系客服'
+            # eflag = send_email(params)
+            # if eflag:
+
+            # 保存验证码到数据库
+            vaild_code = Vaild_Code()
+            vaild_code.code_content = code
+            vaild_code.code_status = 0
+            vaild_code.code_user = email
+            vaild_code.code_time = time.time()
+            vaild_code.save()
+            result['msg'] = '验证码发送成功'
+
+            # else:
+            #     result['code'] = 10003
+            #     result['msg'] = '未知错误，请联系客服'
         else:
             result['code'] = 10002
             result['msg'] = '用户不存在'
@@ -230,3 +282,49 @@ def get_code(request):
         result['msg'] = '邮箱不可为空'
 
     return JsonResponse(result)
+
+def ormobjectstest(request):
+    # 对goods模型进行操作
+    data = Goods.objects.all()
+    print(data)
+    data = Goods.objects.myfilter()
+    print(data)
+    return HttpResponse('ormobjectstest')
+
+# 商品订单
+@loginVaild
+def order(request,status):
+    # 查询该用户的所有订单
+    status = int(status)
+    user_id = request.COOKIES.get('userid')
+    order_info = OrderInfo.objects.filter(store_id_id=user_id,status=status).all()
+
+    # address = order_info.order_id.order_user.useradress_set.first()
+    # print(address.user_address)
+
+    return render(request,'saller/order.html',locals())
+
+# 提醒支付
+def sendemail(request):
+    # 订单详情id
+    order_info_id = request.GET.get('order_info_id')
+    # 找到买家的邮箱
+    # 使用异步发送邮件
+
+    return HttpResponse('发送邮件成功')
+
+def seller_operation(request):
+    # 拒绝订单
+    # 立即发货
+    type = request.GET.get('type')
+    order_info_id = request.GET.get('order_info_id')
+    order_info = OrderInfo.objects.get(id=order_info_id)
+    if type == 'jujue':
+        order_info.status = 4
+        order_info.save()
+    elif type == 'fahuo':
+        order_info.status = 2
+        order_info.save()
+
+    url = request.META.get('HTTP_REFERER')
+    return HttpResponseRedirect(url)

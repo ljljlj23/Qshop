@@ -1,4 +1,20 @@
 from django.db import models
+from django.db.models import Manager
+
+class MyGoodsFilter(Manager):
+    # 自定义方法
+    # 自定义查询 查询条件：id<10的商品
+    def myfilter(self):
+        data = Goods.objects.filter(id__lt=10).values('goods_name')
+        return data
+
+class MyGoodsType(Manager):
+    def myadd(self,type_label,type_description,type_picture='img/01.jpg'):
+        good_stype = GoodsType()
+        good_stype.type_label = type_label
+        good_stype.type_description = type_description
+        good_stype.type_picture = type_picture
+        good_stype.save()
 
 # Create your models here.
 class LoginUser(models.Model):
@@ -20,6 +36,8 @@ class GoodsType(models.Model):
     type_description=models.TextField()
     type_picture=models.ImageField(upload_to='img')
 
+    objects = MyGoodsType()
+
 class Goods(models.Model):
     goods_number = models.CharField(max_length=11,verbose_name='商品编号')
     goods_name = models.CharField(max_length=32,verbose_name='商品名称')
@@ -36,6 +54,8 @@ class Goods(models.Model):
     goods_type=models.ForeignKey(to=GoodsType,on_delete=models.CASCADE,default=1)
     # 店铺 一对多
     goods_store=models.ForeignKey(to=LoginUser,on_delete=models.CASCADE,default=1)
+
+    objects = MyGoodsFilter()
 
 class Vaild_Code(models.Model):
     code_content = models.CharField(max_length=8,verbose_name='验证码')

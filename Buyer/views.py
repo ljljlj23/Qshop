@@ -6,6 +6,8 @@ from Saller.models import *
 from Buyer.models import *
 from alipay import AliPay
 from Qshop.settings import alipay_private_key_string,alipay_public_key_string
+import logging
+collect = logging.getLogger('django')
 
 def setPassword(password):
     md5=hashlib.md5()
@@ -27,6 +29,8 @@ def loginValid(func):
             return response
     return inner
 
+from django.views.decorators.cache import cache_page
+# @cache_page(60*20)    # 视图中使用缓存，缓存寿命20分钟
 def index(request):
     goods_type = GoodsType.objects.all()
     result=[]
@@ -54,6 +58,7 @@ def login(request):
                     response.set_cookie('pwd',pwd)
                     response.set_cookie('user_type',user.user_type)
                     request.session['email']=email
+                    collect.debug('%s is login' % user.email)
                     return response
                 else:
                     error='密码错误'
@@ -101,6 +106,8 @@ def goods_list(request,page):
         print('goods:',goods)
     elif req_type=='search':
         goods = Goods.objects.filter(goods_name__contains=keywords)
+    else:
+        goods = Goods.objects.all()
     comment = goods.order_by('goods_price')[:math.ceil(len(goods) / 5)]
     paginator=Paginator(goods,10)
     page_obj=paginator.page(int(page))
@@ -175,6 +182,10 @@ def payresult(request):
     order_number = request.GET.get('out_trade_no')
     payorder = PayOrder.objects.get(order_number=order_number)
     payorder.order_status=1
+    order_info = payorder.orderinfo_set.all()
+    for one in order_info:
+        one.status = 1
+        one.save()
     payorder.save()
     return render(request,'buyer/payresult.html',locals())
 
@@ -278,3 +289,30 @@ def reqtest(request):
     age = request.GET.get('age')
     myprint.delay(name,age)
     return HttpResponse('req test')
+
+# def reqtest(request):
+#     note.delay()
+#     return HttpResponse('短信发送成功')
+
+def myprocess_tem_response(request):
+    def test():
+        return HttpResponse('my test')
+    rep = HttpResponse('myprocess_tem_response')
+    rep.render = test
+    return rep
+
+from django.core.cache import cache
+def cache_test(request):
+    # 从缓存中提取数据
+    # 根据order_number获取order_total
+    order_number = request.GET.get('order_number')
+    data = cache.get(order_number)
+    # 如果没有，数据查询，增加到缓存中
+    print('-----------------------')
+    if not data:
+        print('++++++++++++++++++++++')
+        payorder = PayOrder.objects.filter(order_number=order_number).first()
+        # 将数据写入cache
+        cache.set(order_number,payorder.order_total,60)
+        data = payorder.order_total
+    return HttpResponse('order_total:%s'%data)

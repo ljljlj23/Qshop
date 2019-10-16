@@ -13,4 +13,8 @@ urlpatterns = [
     path('personal_info/',personal_info),
     path('goods_add/',goods_add),
     path('get_code/',get_code),
+    path('ormobjectstest/',ormobjectstest),
+    re_path('order/(?P<status>\d{1})',order),
+    path('seller_operation/',seller_operation),
+
 ]
