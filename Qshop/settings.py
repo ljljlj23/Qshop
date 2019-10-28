@@ -158,7 +158,7 @@ STATICFILES_DIRS = (
 # 在做静态文件收集的时候，如果收集完成之后，需要注释掉
 # STATIC_ROOT = os.path.join(BASE_DIR,'static')
 
-MEDIA_URL='/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'static')
 
 CACHES = {

@@ -328,3 +328,11 @@ def seller_operation(request):
 
     url = request.META.get('HTTP_REFERER')
     return HttpResponseRedirect(url)
+
+def mytest(request):
+    id = request.GET.get('id')
+    result = {'code': 10000, 'msg': 'success'}
+    if id:
+        result['data'] = 'asdklasjdkl'
+
+    return JsonResponse(result)

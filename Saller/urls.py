@@ -16,5 +16,6 @@ urlpatterns = [
     path('ormobjectstest/',ormobjectstest),
     re_path('order/(?P<status>\d{1})',order),
     path('seller_operation/',seller_operation),
+    path('mytest/',mytest),
 
 ]
